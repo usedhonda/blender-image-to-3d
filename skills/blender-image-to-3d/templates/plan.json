@@ -1,7 +1,7 @@
 {
   "dimensions": {
     "units": "meters",
-    "overall_height": "SET_FROM_APPROVED_DESIGN"
+    "overall_height": 1.8
   },
   "axes": {
     "up": "+Z",
@@ -12,23 +12,23 @@
     {
       "name": "head",
       "method": "rounded mesh",
-      "dimensions": [],
-      "location": []
+      "dimensions": [0.4, 0.3, 0.4],
+      "location": [0.0, 0.0, 1.5]
     }
   ],
   "joins": [
-    "Specify overlaps or connections from adopted design"
+    "neck overlap 0.02 meters"
   ],
   "materials": [
     {
       "name": "body",
-      "base_color_srgb": [],
-      "roughness": null,
+      "base_color_srgb": [0.7, 0.4, 0.3],
+      "roughness": 0.5,
       "metallic": 0
     }
   ],
   "fixed_scope": [
-    "Approved design revision and image hashes must remain fixed"
+    "Approved design revision and image hashes remain fixed"
   ],
   "steps": [
     "Coarse geometry and representative material",

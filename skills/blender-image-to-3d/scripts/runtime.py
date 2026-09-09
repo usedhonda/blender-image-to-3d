@@ -17,6 +17,8 @@ import tempfile
 import time
 import uuid
 import copy
+import math
+import re
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -42,6 +44,40 @@ class ApprovalError(RuntimeErrorBase):
 
 class DuplicateJobError(RuntimeErrorBase):
     pass
+
+
+_AXES = {"X", "Y", "Z"}
+_ROUTES = {"direct", "base_mesh", "generated", "hybrid"}
+_PLACEHOLDER = re.compile(r"(?:set[_ -]?from|tbd|todo|placeholder|fill in|replace with|specify\b|\.{3,})", re.I)
+
+
+def _finite_number(value: Any, label: str, *, positive: bool = False, unit_interval: bool = False) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise RuntimeErrorBase(f"{label} must be a finite number")
+    if positive and value <= 0:
+        raise RuntimeErrorBase(f"{label} must be greater than zero")
+    if unit_interval and not 0 <= value <= 1:
+        raise RuntimeErrorBase(f"{label} must be between 0 and 1")
+    return float(value)
+
+
+def _vector(value: Any, label: str, *, positive: bool = False) -> None:
+    if not isinstance(value, (list, tuple)) or len(value) != 3:
+        raise RuntimeErrorBase(f"{label} must be a three-number vector")
+    for index, item in enumerate(value):
+        _finite_number(item, f"{label}[{index}]", positive=positive)
+
+
+def _reject_placeholder(value: Any, label: str = "plan") -> None:
+    if isinstance(value, str):
+        if _PLACEHOLDER.search(value):
+            raise RuntimeErrorBase(f"{label} contains a placeholder")
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            _reject_placeholder(item, f"{label}.{key}")
+    elif isinstance(value, (list, tuple)):
+        for index, item in enumerate(value):
+            _reject_placeholder(item, f"{label}[{index}]")
 
 
 def sha256_bytes(value: bytes) -> str:
@@ -149,6 +185,124 @@ class Runtime:
             normalized.append({"path": str(path), "sha256": asset["sha256"]})
         return normalized
 
+    @staticmethod
+    def _file_ref(value: Any, label: str, base: Path) -> dict[str, str]:
+        if not isinstance(value, dict) or not isinstance(value.get("path"), str) or not isinstance(value.get("sha256"), str) or not re.fullmatch(r"[0-9a-fA-F]{64}", value["sha256"]):
+            raise RuntimeErrorBase(f"{label} requires path and 64-character sha256")
+        path = Path(value["path"])
+        if not path.is_absolute():
+            path = base / path
+        path = path.resolve()
+        if not path.is_file() or sha256_file(path) != value["sha256"].lower():
+            raise RuntimeErrorBase(f"{label} hash mismatch: {path}")
+        return {"path": str(path), "sha256": value["sha256"].lower()}
+
+    @classmethod
+    def validate_production_plan(cls, plan: Any, references: list[dict[str, str]] | None = None, base: Path | None = None) -> dict[str, Any]:
+        if not isinstance(plan, dict):
+            raise RuntimeErrorBase("production plan must be an object")
+        _reject_placeholder(plan)
+        required = ("dimensions", "axes", "parts", "joins", "materials", "fixed_scope", "steps", "outputs", "validation")
+        if any(key not in plan for key in required):
+            raise RuntimeErrorBase("production plan requires dimensions, axes, parts, joins, materials, fixed_scope, steps, outputs, and validation")
+        if any(key not in plan or not isinstance(plan[key], list) or not plan[key] for key in ("joins", "fixed_scope", "steps", "outputs", "validation")):
+            raise RuntimeErrorBase("production plan requires dimensions, axes, parts, joins, materials, fixed_scope, steps, outputs, and validation")
+        for key in ("joins", "fixed_scope", "steps", "outputs", "validation"):
+            if any(not isinstance(item, str) or not item.strip() for item in plan[key]):
+                raise RuntimeErrorBase(f"{key} must be a non-empty list of strings")
+        dimensions = plan["dimensions"]
+        if not isinstance(dimensions, dict):
+            raise RuntimeErrorBase("dimensions must be an object")
+        measurements = [value for key, value in dimensions.items() if key != "units"]
+        if not any(isinstance(value, (int, float)) and not isinstance(value, bool) for value in measurements):
+            raise RuntimeErrorBase("dimensions must include a finite numeric measurement")
+        for key, value in dimensions.items():
+            if key == "units":
+                if not isinstance(value, str) or not value.strip():
+                    raise RuntimeErrorBase("dimensions.units must be a non-empty string")
+            elif isinstance(value, (int, float, bool)):
+                _finite_number(value, f"dimensions.{key}", positive=True)
+            elif isinstance(value, (list, tuple)):
+                _vector(value, f"dimensions.{key}", positive=True)
+            else:
+                raise RuntimeErrorBase(f"dimensions.{key} must be numeric")
+        axes = plan["axes"]
+        if not isinstance(axes, dict) or set(axes) != {"up", "front", "right"}:
+            raise RuntimeErrorBase("axes must define up, front, and right")
+        directions = []
+        for key, value in axes.items():
+            if not isinstance(value, str) or not re.fullmatch(r"[+-][XYZ]", value):
+                raise RuntimeErrorBase(f"axes.{key} must be a signed X/Y/Z axis")
+            directions.append(value[1])
+        if set(directions) != _AXES:
+            raise RuntimeErrorBase("axes must be signed orthogonal directions on X, Y, and Z")
+        parts = plan["parts"]
+        if not isinstance(parts, list) or not parts:
+            raise RuntimeErrorBase("parts must be a non-empty list")
+        part_names = []
+        for index, part in enumerate(parts):
+            if not isinstance(part, dict) or not isinstance(part.get("name"), str) or not part["name"].strip():
+                raise RuntimeErrorBase(f"parts[{index}] requires a non-empty name")
+            name = part["name"].strip()
+            if name in part_names:
+                raise RuntimeErrorBase("part names must be unique")
+            part_names.append(name)
+            _vector(part.get("dimensions"), f"parts[{index}].dimensions", positive=True)
+            _vector(part.get("location"), f"parts[{index}].location")
+        materials = plan["materials"]
+        if not isinstance(materials, list) or not materials:
+            raise RuntimeErrorBase("materials must be a non-empty list")
+        material_names = []
+        for index, material in enumerate(materials):
+            if not isinstance(material, dict) or not isinstance(material.get("name"), str) or not material["name"].strip():
+                raise RuntimeErrorBase(f"materials[{index}] requires a non-empty name")
+            name = material["name"].strip()
+            if name in material_names:
+                raise RuntimeErrorBase("material names must be unique")
+            material_names.append(name)
+            color = material.get("base_color_srgb")
+            if not isinstance(color, (list, tuple)) or len(color) not in (3, 4):
+                raise RuntimeErrorBase(f"materials[{index}].base_color_srgb must have 3 or 4 channels")
+            for channel, value in enumerate(color):
+                _finite_number(value, f"materials[{index}].base_color_srgb[{channel}]", unit_interval=True)
+            _finite_number(material.get("roughness"), f"materials[{index}].roughness", unit_interval=True)
+            _finite_number(material.get("metallic"), f"materials[{index}].metallic", unit_interval=True)
+        route = plan.get("route", "direct")
+        if not isinstance(route, str) or route not in _ROUTES:
+            raise RuntimeErrorBase(f"route must be one of {sorted(_ROUTES)}")
+        root = base or Path.cwd()
+        plan_refs = plan.get("references", plan.get("reference_assets"))
+        if plan_refs is not None:
+            if not isinstance(plan_refs, list) or not plan_refs:
+                raise RuntimeErrorBase("references must be a non-empty file reference list")
+            normalized = [cls._file_ref(item, "reference", root) for item in plan_refs]
+            if references is not None and {(x["path"], x["sha256"]) for x in normalized} != {(x["path"], x["sha256"]) for x in references}:
+                raise RuntimeErrorBase("production references do not match the approved design assets")
+        elif references is not None:
+            raise RuntimeErrorBase("production plan must carry the approved design references")
+        if route in {"base_mesh", "generated", "hybrid"}:
+            asset = plan.get("asset", plan.get("source_asset"))
+            if asset is None:
+                raise RuntimeErrorBase(f"{route} route requires an actual asset with path and sha256")
+            cls._file_ref(asset, "route asset", root)
+            transforms = plan.get("transforms")
+            if not isinstance(transforms, dict):
+                raise RuntimeErrorBase(f"{route} route requires transforms")
+            for key in ("location", "rotation", "scale"):
+                _vector(transforms.get(key), f"transforms.{key}", positive=key == "scale")
+        return plan
+
+    def require_production(self, design_revision: str | None = None) -> dict[str, Any]:
+        self.require_approval(design_revision)
+        state = self.read()
+        current = (state.get("design_revisions") or [{}])[-1]
+        production = state.get("production") or {}
+        if not production.get("plan") or production.get("design_revision") != current.get("revision") or (design_revision and production.get("design_revision") != design_revision):
+            raise RuntimeErrorBase("production-check is required before this operation")
+        assets = self._asset_entries(current.get("design", {}))
+        self.validate_production_plan(production["plan"], assets, self.state_path.parent)
+        return production
+
     def _input_unchanged(self, state: dict[str, Any]) -> None:
         source = Path(state["input"]["path"])
         if not source.is_file() or sha256_file(source) != state["input"]["sha256"]:
@@ -220,9 +374,7 @@ class Runtime:
     def register_coarse(self, design_revision: str, artifact: dict[str, Any], label: str | None = None) -> dict[str, Any]:
         """Register a coarse geometry/material candidate after design approval."""
         self.require_approval(design_revision)
-        state_before = self.read()
-        if not state_before.get("production", {}).get("plan") or state_before["production"].get("design_revision") != design_revision:
-            raise RuntimeErrorBase("production-check is required before coarse registration")
+        self.require_production(design_revision)
         artifact = copy.deepcopy(artifact)
         artifact["assets"] = self._asset_entries(artifact)
         artifact_hash = stable_hash(artifact)
@@ -293,12 +445,14 @@ class Runtime:
         return approval
 
     def production_check(self, plan: dict[str, Any], revision: str | None = None) -> dict[str, Any]:
-        self.require_approval(revision)
+        approval = self.require_approval(revision)
+        state = self.read()
+        current = next(item for item in state.get("design_revisions", []) if item["revision"] == approval["revision"])
+        assets = self._asset_entries(current.get("design", {}))
+        self.validate_production_plan(plan, assets, self.state_path.parent)
         required = ("dimensions", "axes", "parts", "joins", "materials", "fixed_scope", "steps", "outputs", "validation")
-        if any(not plan.get(key) for key in required):
-            raise RuntimeErrorBase("production plan requires non-empty dimensions, axes, parts, joins, materials, fixed_scope, steps, outputs, validation")
         def mutate(state):
-            state["production"] = {"plan": plan, "checked_at": _now(), "checks": list(required), "design_revision": (state.get("design_revisions") or [])[-1]["revision"]}
+            state["production"] = {"plan": copy.deepcopy(plan), "checked_at": _now(), "checks": list(required), "design_revision": approval["revision"]}
             state["stage"] = "production_plan"
             state["next_action"] = "register_coarse"
             return state
@@ -309,14 +463,50 @@ class Runtime:
         key = stable_hash({"input": input_hash, "revision": revision, "environment": environment, "scope": scope})
         state = self.read()
         previous = state.setdefault("checkpoints", {}).get(name)
-        if previous and previous["key"] == key and previous.get("passed") is True and previous.get("result") is not None:
+        artifacts, fileless = self._checkpoint_evidence(result, self.state_path.parent, reusable=bool(passed))
+        previous_artifacts = previous.get("artifacts", []) if previous else []
+        previous_fileless = bool(previous.get("fileless")) if previous else False
+        previous_valid = previous and previous["key"] == key and previous.get("passed") is True and ((previous_fileless and not previous_artifacts) or self._verify_artifacts(previous_artifacts, self.state_path.parent))
+        if previous_valid:
             return {"name": name, "key": key, "reused": True, "record": previous}
-        record = {"key": key, "input_hash": input_hash, "revision": revision, "environment": environment, "scope": scope, "result": result, "passed": bool(passed), "updated_at": _now()}
+        record = {"key": key, "input_hash": input_hash, "revision": revision, "environment": environment, "scope": scope, "result": result, "artifacts": artifacts, "fileless": fileless, "passed": bool(passed), "updated_at": _now()}
         def mutate(current):
             current.setdefault("checkpoints", {})[name] = record
             return current
         self._update(mutate)
         return {"name": name, "key": key, "reused": False, "record": record}
+
+    @staticmethod
+    def _verify_artifacts(artifacts: Any, base: Path) -> bool:
+        if not isinstance(artifacts, list):
+            return False
+        for artifact in artifacts:
+            try:
+                Runtime._file_ref(artifact, "checkpoint artifact", base)
+            except RuntimeErrorBase:
+                return False
+        return bool(artifacts)
+
+    @classmethod
+    def _checkpoint_evidence(cls, result: Any, base: Path, *, reusable: bool) -> tuple[list[dict[str, str]], bool]:
+        if not isinstance(result, dict):
+            if reusable:
+                raise RuntimeErrorBase("checkpoint result must explicitly declare fileless true or artifacts")
+            return [], False
+        fileless = result.get("fileless") is True
+        artifacts = result.get("artifacts")
+        if fileless:
+            if artifacts or "path" in result:
+                raise RuntimeErrorBase("fileless checkpoint cannot include file artifacts")
+            return [], True
+        if artifacts is None and "path" in result:
+            artifacts = [{"path": result.get("path"), "sha256": result.get("sha256")}]
+        if not isinstance(artifacts, list) or not artifacts:
+            if reusable:
+                raise RuntimeErrorBase("checkpoint result requires artifacts with hashes or fileless true")
+            return [], False
+        normalized = [cls._file_ref(item, "checkpoint artifact", base) for item in artifacts]
+        return normalized, False
 
     def reserve_job(self, request: dict[str, Any]) -> dict[str, Any]:
         request_hash = stable_hash(request)
@@ -389,8 +579,11 @@ class Runtime:
         except (ApprovalError, RuntimeErrorBase):
             pass
         current = (state.get("design_revisions") or [{}])[-1]
-        production = state.get("production", {})
-        production_ok = design_ok and bool(production.get("plan")) and production.get("design_revision") == current.get("revision")
+        try:
+            self.require_production(current.get("revision"))
+            production_ok = design_ok
+        except (ApprovalError, RuntimeErrorBase):
+            production_ok = False
         return {"job_id": state["job_id"], "input": state["input"], "stage": state.get("stage"), "next_action": state.get("next_action"), "current_revision": current.get("revision"), "coarse_revision": (state.get("coarse_revisions") or [{}])[-1].get("revision"), "input_valid": input_ok, "design_approved": design_ok, "coarse_approved": coarse_ok, "production_checked": production_ok}
 
     def scene_lock(self, scene_path: str | os.PathLike[str] | None = None) -> contextlib.AbstractContextManager[None]:
