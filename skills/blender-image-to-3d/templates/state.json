@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "job_id": "GENERATED_BY_INIT",
+  "stage": "image_intake",
+  "next_action": "register_design",
+  "created_at": "GENERATED_BY_INIT",
+  "input": {
+    "path": "/absolute/job/original.png",
+    "sha256": "GENERATED_BY_INIT"
+  },
+  "output_root": "/absolute/job/outputs/JOB_ID",
+  "design_revisions": [],
+  "approval": null,
+  "coarse_revisions": [],
+  "coarse_approval": null,
+  "production": {
+    "plan": null,
+    "checks": []
+  },
+  "checkpoints": {},
+  "jobs": {},
+  "environment": {}
+}

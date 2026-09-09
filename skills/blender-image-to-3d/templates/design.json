@@ -1,0 +1,14 @@
+{
+  "assets": [
+    {
+      "path": "/absolute/path/to/design-r1.png",
+      "sha256": "REPLACE_WITH_FILE_SHA256"
+    }
+  ],
+  "identity_locks": [],
+  "inferred": [],
+  "requested_expressions": [
+    "neutral"
+  ],
+  "materials": []
+}

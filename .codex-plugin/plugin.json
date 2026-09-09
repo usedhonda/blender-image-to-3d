@@ -1,0 +1,18 @@
+{
+  "name": "blender-image-to-3d",
+  "version": "0.1.0",
+  "description": "Design complete image references, approve them, and build editable Blender models with explicit Astra handoffs.",
+  "author": {
+    "name": "usedhonda"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Blender Image to 3D",
+    "shortDescription": "Approved image designs to editable Blender models.",
+    "longDescription": "A staged image-to-3D skill with human design gates, durable production plans, and reusable Blender scripts.",
+    "developerName": "usedhonda",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "$blender-image-to-3d /path/to/image.png"
+  }
+}

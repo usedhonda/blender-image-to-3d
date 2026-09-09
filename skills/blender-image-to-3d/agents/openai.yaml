@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blender Image to 3D"
+  short_description: "Build an editable Blender model from an approved image"
+  default_prompt: "Use $blender-image-to-3d on the supplied image. Preserve its style and identity, obtain design approval before production, and leave an editable Blender source plus verified review renders."

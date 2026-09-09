@@ -1,0 +1,49 @@
+{
+  "dimensions": {
+    "units": "meters",
+    "overall_height": "SET_FROM_APPROVED_DESIGN"
+  },
+  "axes": {
+    "up": "+Z",
+    "front": "-Y",
+    "right": "+X"
+  },
+  "parts": [
+    {
+      "name": "head",
+      "method": "rounded mesh",
+      "dimensions": [],
+      "location": []
+    }
+  ],
+  "joins": [
+    "Specify overlaps or connections from adopted design"
+  ],
+  "materials": [
+    {
+      "name": "body",
+      "base_color_srgb": [],
+      "roughness": null,
+      "metallic": 0
+    }
+  ],
+  "fixed_scope": [
+    "Approved design revision and image hashes must remain fixed"
+  ],
+  "steps": [
+    "Coarse geometry and representative material",
+    "Human coarse approval",
+    "Finish within approved scope"
+  ],
+  "outputs": [
+    "model.blend",
+    "model.glb",
+    "review renders"
+  ],
+  "validation": [
+    "Named editable parts",
+    "Compare adopted views",
+    "Save and reopen blend",
+    "Import GLB and render"
+  ]
+}
