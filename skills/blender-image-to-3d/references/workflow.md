@@ -23,8 +23,8 @@ Block out head, torso, pelvis, limbs, hair masses, clothing, and props. Fix silh
 
 For joins, inspect hairline/neck, clothing openings, hands/tools, shoes, accessories, and hidden intersections from oblique and back views. A repair may be local separation, a rebuilt part, base-mesh replacement, or route change. Record the repair and its fixed scope.
 
-For direct scripts, prefer Blender data APIs where possible; isolate context-dependent operators. Write one scene at a time, verify object/dimension/render existence after each write, and checkpoint before topology, UV, shape-key, or rig changes. Re-running a stage must update semantic objects instead of duplicating them.
+For direct scripts, prefer Blender data APIs where possible; isolate context-dependent operators. Write one scene at a time, verify affected objects/dimensions and required artifacts after each meaningful batch, and checkpoint before topology, UV, shape-key, or rig changes. Re-running a stage must update semantic objects instead of duplicating them.
 
 ## Astra handoff
 
-The plan must state units, X/Y/Z meaning and front direction, dimensions or anchors, part list, joins, route, material strategy, order, acceptance, permitted repairs, and fixed items. Pass only the approved scope. Use the bundled runtime interface when it is available; otherwise use a verified Blender Python or MCP entry point and record which one was used.
+The plan must state units, X/Y/Z meaning and front direction, dimensions or anchors, part list, joins, route, material strategy, order, acceptance, permitted repairs, and fixed items. Pass only the approved scope, image revision and hashes, necessary reference files, current scene/checkpoint, and exact next action. Do not fork the entire design conversation or rediscover resolved choices. Use the bundled runtime interface when it is available; otherwise use a verified Blender Python or MCP entry point and record which one was used.
