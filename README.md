@@ -29,6 +29,12 @@ Available usage is recorded across design, handoff, production, repairs, and ver
 
 Expressions, animation, VRM/game delivery, and 3D printing add their own acceptance checks. A generated image, accepted provider job, or attractive render is not treated as a finished model until the mesh is imported, inspected, saved, and rendered.
 
+## Production history
+
+Every completed example records the single starting image, later references and their purpose, approved design, blockout, representative materials, before/after repairs, final model, and export re-import proof. Use the [production story template](skills/blender-image-to-3d/templates/production-story.md). Actual work captures are distinguished from later showcase imagery; private source assets are not automatically published.
+
+The [practitioner lessons](skills/blender-image-to-3d/references/practitioner-lessons.md) inform route selection, representative construction, and reusable quality checks. VRoid/base-mesh routes are candidates, not required dependencies or proven character-quality guarantees.
+
 ## Installation
 
 For a normal local skill installation from a checkout, install only the nested skill directory. Inspect the destination first and do not overwrite an existing skill:
