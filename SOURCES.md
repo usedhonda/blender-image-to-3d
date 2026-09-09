@@ -30,3 +30,7 @@ These are comparison references, not bundled dependencies or quality guarantees:
 - Thinking in Blender: <https://arxiv.org/abs/2606.02580>
 
 Provider fields, model names, hardware requirements, pricing, and add-on behavior can change. Verify current official documentation at execution time and record the verification date. Community posts and demos are treated as hypotheses or failure examples, never as measured guarantees.
+
+## Firsthand production reports
+
+The [practitioner source ledger](skills/blender-image-to-3d/references/practitioner-lessons.md) records note articles, observations, limitations, and their workflow implications. These sources are not required reading for every invocation or proof of this skill's production quality.

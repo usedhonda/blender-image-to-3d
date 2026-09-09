@@ -45,3 +45,7 @@ The 2026-09-09 revision changes instructions and Markdown templates only; runtim
 | Saved-state resume | Validate current state, retain scripts and artifacts, reuse still-valid evidence, and execute the recorded next action. | Existing runtime checks remain the state-validation authority. |
 
 The quality template records available usage across stages and agents, separates API accounting from Codex quota, and prevents cumulative-counter and reasoning double counting. Missing data remains unknown. The optional [token efficiency reference](../skills/blender-image-to-3d/references/token-efficiency.md) separates official facts from unmeasured workflow hypotheses.
+
+## Practitioner knowledge integration
+
+Documentation now distinguishes input/environment route selection, representative reusable construction, human design preference vs technical acceptance, and actual production history vs showcase imagery. The chronological template starts from one original and records added references and repairs. These are workflow requirements, not new live production evidence. Issue #3 runtime defects, an approved character production run, and repeated quality evaluation remain outstanding; this documentation update does not close them.
