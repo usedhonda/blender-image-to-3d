@@ -61,3 +61,9 @@ The old revision reproduced both acceptance of placeholder plans and reuse of a 
 A reference-cleanup trial exposed identity drift despite source-preservation instructions: contour, facial marks, and shading changed the perceived softness. The guidance now separates cleanup from fidelity, original authority from supplemental adoption, and aesthetic polish from source match. It makes cleanup optional and records original/previous/current comparison and scoped acceptance. More detailed prompts are a repair method, not evidence of exact preservation.
 
 This revision changes instructions and templates only. It adds no image-generation run, runtime behavior, character-quality proof, or measured savings claim. Private trial assets remain outside the public repository.
+
+## Failed character trial and quality decision correction
+
+A local character trial saved/reopened successfully but failed likeness. The implementation used estimated ring/curve parameters and facial overlays without adequate correspondence to the adopted design. Subsequent local improvements were incorrectly treated as grounds to request stage advancement; the user rejected the result. The procedural character method remains unverified for the intended quality. Save/reopen evidence proves only that technical operation.
+
+The skill now separates original provenance from the adopted modeling target, requires target-relative visual judgment during construction, and rejects known failures before human preference approval. Further execution needs a supported cause/intervention/expected-improvement link; otherwise the method is reassessed. This documentation correction does not establish successful character production or token savings. Private trial artifacts remain excluded.
