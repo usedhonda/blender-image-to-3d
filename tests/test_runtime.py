@@ -1,4 +1,5 @@
 import json
+import hashlib
 import tempfile
 import unittest
 import sys
@@ -7,7 +8,7 @@ from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "skills" / "blender-image-to-3d" / "scripts"))
-from runtime import ApprovalError, DuplicateJobError, Runtime, mcp_status_error
+from runtime import ApprovalError, DuplicateJobError, Runtime, RuntimeErrorBase, mcp_status_error
 import blender_entry
 
 
@@ -24,6 +25,22 @@ class RuntimeTests(unittest.TestCase):
 
     def design(self, value):
         return {**value, "assets": [{"path": str(self.asset), "sha256": __import__("hashlib").sha256(self.asset.read_bytes()).hexdigest()}]}
+
+    def plan(self, **overrides):
+        value = {
+            "dimensions": {"units": "meters", "overall_height": 1.8},
+            "axes": {"up": "+Z", "front": "-Y", "right": "+X"},
+            "parts": [{"name": "head", "dimensions": [0.4, 0.3, 0.4], "location": [0, 0, 1.5]}],
+            "joins": ["neck overlap 0.02m"],
+            "materials": [{"name": "body", "base_color_srgb": [0.7, 0.4, 0.3], "roughness": 0.5, "metallic": 0}],
+            "fixed_scope": ["approved proportions"],
+            "steps": ["build", "check"],
+            "outputs": ["model.blend"],
+            "validation": ["save and reopen"],
+            "references": [{"path": str(self.asset), "sha256": hashlib.sha256(self.asset.read_bytes()).hexdigest()}],
+        }
+        value.update(overrides)
+        return value
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -62,19 +79,65 @@ class RuntimeTests(unittest.TestCase):
         self.runtime.approve(rev["revision"], "human", "signed note")
         with self.assertRaises(Exception):
             self.runtime.production_check({"steps": ["build"]}, rev["revision"])
-        plan = {key: [key] for key in ("dimensions", "axes", "parts", "joins", "materials", "fixed_scope", "steps", "outputs", "validation")}
+        plan = self.plan()
         result = self.runtime.production_check(plan, rev["revision"])
         self.assertTrue(result["production"]["plan"])
 
+    def test_production_rejects_placeholder_and_bad_types(self):
+        rev = self.runtime.register_design(self.design({"mesh": "low-poly"}))
+        self.runtime.approve(rev["revision"], "human", "signed note")
+        with self.assertRaises(Exception):
+            self.runtime.production_check(self.plan(dimensions={"overall_height": "SET_FROM_APPROVED_DESIGN"}), rev["revision"])
+        with self.assertRaises(Exception):
+            self.runtime.production_check(self.plan(parts=[{"name": "head", "dimensions": [True, 1, 1], "location": [0, 0, 0]}]), rev["revision"])
+        with self.assertRaises(Exception):
+            self.runtime.production_check(self.plan(axes={"up": "+Z", "front": "+Z", "right": "+X"}), rev["revision"])
+
+    def test_invalid_stored_plan_cannot_resume_or_register_coarse(self):
+        rev = self.runtime.register_design(self.design({"mesh": "low-poly"}))
+        self.runtime.approve(rev["revision"], "human", "signed note")
+        self.runtime.production_check(self.plan(), rev["revision"])
+        self.runtime._update(lambda state: state["production"]["plan"].pop("dimensions"))
+        self.assertFalse(self.runtime.resume()["production_checked"])
+        with self.assertRaises(RuntimeErrorBase):
+            self.runtime.require_production(rev["revision"])
+        with self.assertRaises(RuntimeErrorBase):
+            self.runtime.register_coarse(rev["revision"], self.design({"vertices": 10}))
+        with self.assertRaises(RuntimeErrorBase):
+            blender_entry._mutation_guard(self.runtime, rev["revision"], self.root / "outputs" / "blocked.blend", self.runtime.read()["job_id"], "coarse")
+
+    def test_non_direct_route_requires_hashed_asset_and_transforms(self):
+        rev = self.runtime.register_design(self.design({"mesh": "generated"}))
+        self.runtime.approve(rev["revision"], "human", "signed note")
+        with self.assertRaises(Exception):
+            self.runtime.production_check(self.plan(route="generated"), rev["revision"])
+        self.assertTrue(self.runtime.production_check(self.plan(route="generated", asset={"path": str(self.asset), "sha256": hashlib.sha256(self.asset.read_bytes()).hexdigest()}, transforms={"location": [0, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1]}), rev["revision"])["production"]["plan"])
+
     def test_checkpoint_and_ambiguous_job_are_idempotent(self):
-        first = self.runtime.checkpoint("render", "input", "r1", {"blender": "5.2.1"}, {"view": "front"}, {"path": "front.png"}, True)
-        second = self.runtime.checkpoint("render", "input", "r1", {"blender": "5.2.1"}, {"view": "front"}, {"path": "front.png"}, True)
+        render = self.root / "front.png"
+        render.write_bytes(b"render")
+        render_hash = hashlib.sha256(render.read_bytes()).hexdigest()
+        first = self.runtime.checkpoint("render", "input", "r1", {"blender": "5.2.1"}, {"view": "front"}, {"path": "front.png", "sha256": render_hash}, True)
+        second = self.runtime.checkpoint("render", "input", "r1", {"blender": "5.2.1"}, {"view": "front"}, {"path": "front.png", "sha256": render_hash}, True)
         self.assertFalse(first["reused"])
         self.assertTrue(second["reused"])
+        render.unlink()
+        missing = self.runtime.checkpoint("render", "input", "r1", {"blender": "5.2.1"}, {"view": "front"}, {"fileless": True}, True)
+        self.assertFalse(missing["reused"])
+        self.assertTrue(missing["record"]["fileless"])
+        self.assertTrue(self.runtime.checkpoint("render", "input", "r1", {"blender": "5.2.1"}, {"view": "front"}, {"fileless": True}, True)["reused"])
         changed_view = self.runtime.checkpoint("render", "input", "r1", {"blender": "5.2.1"}, {"view": "back"})
         self.assertFalse(changed_view["reused"])
         unperformed = self.runtime.checkpoint("render", "input", "r1", {"blender": "5.2.1"}, {"view": "back"})
         self.assertFalse(unperformed["reused"])
+        modified = self.root / "modified.png"
+        modified.write_bytes(b"before")
+        modified_hash = hashlib.sha256(modified.read_bytes()).hexdigest()
+        self.runtime.checkpoint("modified", "input", "r1", {"blender": "5.2.1"}, {"view": "front"}, {"path": "modified.png", "sha256": modified_hash}, True)
+        modified.write_bytes(b"after")
+        self.assertFalse(self.runtime.checkpoint("modified", "input", "r1", {"blender": "5.2.1"}, {"view": "front"}, {"fileless": True}, True)["reused"])
+        with self.assertRaises(Exception):
+            self.runtime.checkpoint("legacy", "input", "r1", {"blender": "5.2.1"}, result={"path": "missing.png"}, passed=True)
         job = self.runtime.reserve_job({"kind": "mesh", "revision": "r1"})
         self.assertTrue(self.runtime.reserve_job({"kind": "mesh", "revision": "r1"})["reused"])
         self.runtime.update_job(job["request_hash"], "unknown")
@@ -90,7 +153,7 @@ class RuntimeTests(unittest.TestCase):
     def test_finish_requires_independent_coarse_approval(self):
         design = self.runtime.register_design(self.design({"mesh": "coarse"}))
         self.runtime.approve(design["revision"], "human", "design-review")
-        plan = {key: [key] for key in ("dimensions", "axes", "parts", "joins", "materials", "fixed_scope", "steps", "outputs", "validation")}
+        plan = self.plan()
         self.runtime.production_check(plan, design["revision"])
         coarse = self.runtime.register_coarse(design["revision"], self.design({"vertices": 100, "materials": ["skin"]}))
         with self.assertRaises(ApprovalError):

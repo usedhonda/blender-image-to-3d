@@ -8,11 +8,11 @@ This document separates completed evidence from pending checks. It is intentiona
 | Official Blender MCP | The same Blender 5.2.1 environment produced an identical cube render through the official MCP route. | Verified baseline | Confirm the exact MCP package/version if the host changes. |
 | Save and reopen | The baseline cube scene saved and reopened successfully. | Verified baseline | Verify the character `.blend` after the approved run. |
 | Imagegen background cleanup | A clean RGB reference with a white background was observed; alpha transparency was not claimed. | Verified handling rule | Inspect alpha mode for each future imagegen result. |
-| Design approval | The workflow requires an approved complete design revision before production. | Pending for current character | Obtain the user's R2 design approval. |
-| Coarse geometry and representative materials | The workflow requires a second human gate before finish work. | Pending for current character | Produce the coarse pass after R2 approval and obtain the gate. |
+| Design approval | The workflow requires an approved complete design revision before production. | Pending for current character | Approve the selected character's staged design revision; the earlier robot R2 is not an approval for this run. |
+| Coarse geometry and representative materials | The workflow requires a second human gate before finish work. | Pending for current character | Produce the face/hair coarse pass after its design approval and obtain the gate. |
 | Astra high design/review host | Documentation defines explicit high reasoning selection when available. | Host/config dependent | Read back the actual host/model configuration at execution time. |
 | Astra low production host | Documentation defines explicit low reasoning handoff with no fork. | Not run for current character | Execute after the complete design revision is approved; then obtain the separate coarse geometry/material approval before finish work. |
-| Imagegen/reference set | R2 produced front, back, side, oblique, top, and sole views, plus neutral/smile references and four material references. | Evidence available; design approval pending | Obtain approval, then use only the approved views and record observed versus inferred content. |
+| Imagegen/reference set | An earlier robot R2 trial produced multiple views and material references; it was not adopted for character production. | Historical trial only | Start the selected character from its single original; add and approve references only when the staged run needs them. |
 | Editable semantic parts and joins | Required by the skill and templates. | Pending for current character | Inspect named parts, hairline/neck, clothing, accessories, and hidden intersections. |
 | Export and re-import | Required completion gate. | Pending for current character | Export requested format, import into a clean scene, and render again. |
 | Motion/expressions/print | Separate optional completion gates. | Not claimed | Run only when requested and their specific checks are in scope. |
@@ -25,7 +25,7 @@ MCP is optional. If it is unavailable, the skill may use Blender's Python or ano
 
 ## Runtime and distribution checks
 
-- Seven focused stdlib tests cover pre-approval refusal, original/design asset changes, detailed plan validation, independent coarse approval, checkpoint reuse and affected views, unknown-job reconciliation, nested MCP errors, Blender argument parsing, and namespaced Empty idempotency. The Blender-free fixture is not live geometry proof.
+- Focused stdlib tests cover pre-approval refusal, original/design asset changes, detailed plan validation, independent coarse approval, checkpoint reuse and affected views, unknown-job reconciliation, nested MCP errors, Blender argument parsing, and namespaced Empty idempotency. The Blender-free fixture is not live geometry proof.
 - The packaged entry script was executed by Blender 5.2.1 LTS for a read-only scene inspection: three default objects, one mesh, eight vertices, six polygons. The live test caught and fixed Blender's missing sibling-module search path. Direct commands use `--python-exit-code 1` so a Python exception cannot be mistaken for success.
 - Skill and plugin format validators passed. Codex `skills/list` discovered the local skill as enabled under the qualified name `blender-image-to-3d:blender-image-to-3d`. Discovery is not a completed production invocation.
 - No token reduction percentage is claimed. The image-reference trial used five image-generation calls (including one failed RGB checkerboard extraction and its white-background replacement, then one material correction). No image-generation token usage was exposed.
@@ -48,4 +48,10 @@ The quality template records available usage across stages and agents, separates
 
 ## Practitioner knowledge integration
 
-Documentation now distinguishes input/environment route selection, representative reusable construction, human design preference vs technical acceptance, and actual production history vs showcase imagery. The chronological template starts from one original and records added references and repairs. These are workflow requirements, not new live production evidence. Issue #3 runtime defects, an approved character production run, and repeated quality evaluation remain outstanding; this documentation update does not close them.
+Documentation now distinguishes input/environment route selection, representative reusable construction, human design preference vs technical acceptance, and actual production history vs showcase imagery. The chronological template starts from one original and records added references and repairs. These are workflow requirements, not new live production evidence. Issue #3 requires runtime corrections, an approved character production run, and repeat quality evidence. Runtime corrections alone do not close the issue.
+
+## Issue #3 runtime correction
+
+The runtime now validates typed dimensions, axes, named parts, material values, route assets/transforms, and approved reference hashes. Resume, coarse registration, and Blender mutation revalidate the stored plan. Passed checkpoints require verified file hashes or an explicit fileless result; deleted, modified, and hashless legacy artifacts are not reused.
+
+The old revision reproduced both acceptance of placeholder plans and reuse of a deleted hashless result. Focused regressions cover the corrected boundaries, including matching-key missing/modified artifacts and stored-plan mutation refusal. An independent representative checkpoint test passed after diff inspection. This is runtime evidence, not character quality or hair-motion proof; Issue #3 remains open for its production and repeat-run criteria.

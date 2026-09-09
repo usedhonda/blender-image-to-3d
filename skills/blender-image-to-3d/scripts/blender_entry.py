@@ -39,9 +39,8 @@ def _mutation_guard(runtime: Runtime, revision: str, output: Path, job_id: str, 
     if state.get("job_id") != job_id:
         raise RuntimeError("job_id does not own this output")
     runtime.require_approval(revision)
+    runtime.require_production(revision)
     state = runtime.read()
-    if not state.get("production", {}).get("plan"):
-        raise RuntimeError("production-check is required before scene mutation")
     if stage == "final":
         runtime.require_finish(revision)
     if not output.is_absolute():
