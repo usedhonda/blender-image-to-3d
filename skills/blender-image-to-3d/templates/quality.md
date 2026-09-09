@@ -4,6 +4,15 @@
 - Changed parts/properties and invalidated evidence: `...`
 - Reused passing evidence and why it remains valid: `...`
 
+## Production target and continuation decision
+- Original provenance and exact adopted production/comparison revision: `...`
+- Actual target/current comparison under comparable camera and display conditions: `...`
+- Visual result against target (pass/fail/unresolved), separate from technical result: `...`
+- If failed: observed mismatch -> supported cause -> proposed intervention -> expected visible improvement: `...`
+- Decision: supported repair / reassess method / credible candidate for human preference: `...`
+
+Complete this compact decision only when it changes the next action; do not create repeated review ceremonies. A previous-attempt improvement does not override target failure.
+
 ## Evidence
 - Source-match: `...`
 - Face close-up: `...`
