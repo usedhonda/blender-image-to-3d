@@ -14,6 +14,12 @@ Production starts only after a human approves a complete design revision: scope,
 
 The skill prefers GPT-6 Astra at high reasoning for design and review when an explicit host configuration provides it, then delegates production to GPT-6 Astra at low reasoning with no fork when that host is available. This is a host-side choice; the skill never changes the active model by itself. If a manual switch is needed, confirm the configured model and host first. MCP is optional. The official Blender MCP reference is <https://projects.blender.org/lab/blender_mcp>.
 
+## Efficient production
+
+The revised workflow batches related Blender operations through either CLI or MCP, passes a bounded approved contract from Astra High to Low, and repairs only affected parts and views. Passing evidence is reused while its relevant conditions remain valid; host-side waits avoid empty model wakeups. Final approval and export verification remain required.
+
+Available usage is recorded across design, handoff, production, repairs, and verification. API tokens/cost and Codex quota are separate. High-to-Low savings remain unmeasured. The [efficiency reference](skills/blender-image-to-3d/references/token-efficiency.md) is loaded only for consumption diagnosis or comparison, not on every invocation.
+
 ## What it delivers
 
 - editable `.blend` with semantic objects and checkpoints;

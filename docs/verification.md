@@ -32,3 +32,16 @@ MCP is optional. If it is unavailable, the skill may use Blender's Python or ano
 - The original manual, generated demo images, production state, and local environment records are excluded from Git.
 
 Reproduced failures and their reusable fixes are documented in [workflow troubleshooting](../skills/blender-image-to-3d/references/troubleshooting.md), including Blender sibling imports, misleading process exit status, RGB checkerboards, material drift, and independent resume validity fields.
+
+## Efficiency workflow revision
+
+The 2026-09-09 revision changes instructions and Markdown templates only; runtime CLI, JSON state, approval validation, and existing jobs remain compatible. Existing live Blender baseline evidence is reused. No character production or paid comparison was performed, and no savings percentage is established.
+
+| Scenario | Instruction walkthrough result | Evidence limit |
+|---|---|---|
+| Initial production | Inspect immutable input, approve full design, pass only the bounded contract to Low, batch blockout, then require coarse approval. References are selected for the chosen route. | Documentation consistency, not a live character run. |
+| Local repair | Name the discrepancy and fixed properties, invalidate affected evidence, and inspect the relevant views under matching conditions. No fixed repair count or automatic full turntable. | No measured repair-token reduction. |
+| Long render wait | Use host waiting/completion signals within responsiveness constraints; an empty timeout does not authorize a restart or duplicate request. | Actual host scheduling remains environment-dependent. |
+| Saved-state resume | Validate current state, retain scripts and artifacts, reuse still-valid evidence, and execute the recorded next action. | Existing runtime checks remain the state-validation authority. |
+
+The quality template records available usage across stages and agents, separates API accounting from Codex quota, and prevents cumulative-counter and reasoning double counting. Missing data remains unknown. The optional [token efficiency reference](../skills/blender-image-to-3d/references/token-efficiency.md) separates official facts from unmeasured workflow hypotheses.
