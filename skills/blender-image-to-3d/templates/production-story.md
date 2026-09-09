@@ -21,7 +21,7 @@ Use this as the actual production README, not a hypothetical tutorial. Preserve 
 | 7. Finished editable model | | | Remaining limits | |
 | 8. Saved source and export re-import render | | | Actual target-format check | |
 
-Link original input, adopted parameters, rerunnable scripts, comparison renders, and final artifacts. Record unsuccessful attempts without presenting them as accepted results. Label actual production captures, illustrative reconstructions, and later showcase imagery distinctly.
+Link original input, adopted parameters, rerunnable scripts, comparison renders, and final artifacts. Record unsuccessful attempts without presenting them as accepted results. For a reference revision, link the original, previous candidate, and current candidate; record the user-observed mismatch, the targeted correction, and the accepted version and scope. Distinguish acceptance as a supplemental reference from source replacement, coarse approval, or completed-model acceptance. Label actual production captures, illustrative reconstructions, and later showcase imagery distinctly.
 
 ## Reusable outcome
 

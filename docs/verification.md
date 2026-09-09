@@ -55,3 +55,9 @@ Documentation now distinguishes input/environment route selection, representativ
 The runtime now validates typed dimensions, axes, named parts, material values, route assets/transforms, and approved reference hashes. Resume, coarse registration, and Blender mutation revalidate the stored plan. Passed checkpoints require verified file hashes or an explicit fileless result; deleted, modified, and hashless legacy artifacts are not reused.
 
 The old revision reproduced both acceptance of placeholder plans and reuse of a deleted hashless result. Focused regressions cover the corrected boundaries, including matching-key missing/modified artifacts and stored-plan mutation refusal. An independent representative checkpoint test passed after diff inspection. This is runtime evidence, not character quality or hair-motion proof; Issue #3 remains open for its production and repeat-run criteria.
+
+## Reference-image fidelity pitfalls
+
+A reference-cleanup trial exposed identity drift despite source-preservation instructions: contour, facial marks, and shading changed the perceived softness. The guidance now separates cleanup from fidelity, original authority from supplemental adoption, and aesthetic polish from source match. It makes cleanup optional and records original/previous/current comparison and scoped acceptance. More detailed prompts are a repair method, not evidence of exact preservation.
+
+This revision changes instructions and templates only. It adds no image-generation run, runtime behavior, character-quality proof, or measured savings claim. Private trial assets remain outside the public repository.
