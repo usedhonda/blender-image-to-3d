@@ -14,6 +14,16 @@ Preserve the attached character exactly: face, hair silhouette, colors, asymmetr
 Using the immutable original and approved design brief, draw the same character from [front/back/side/oblique]. Preserve [identity locks], [head/body anchors], [palette], [asymmetry], and [part count]. Use the same scale, margins, neutral pose, and front direction as the approved reference. Invent only the listed inferred areas: [inferred areas]. No text, labels, frames, or extra props.
 ```
 
+## Identity-locked edit
+
+```text
+Use the attached original as the sole identity authority. Preserve the approved pose, camera angle, head and body proportions, feature ratios and spacing, asymmetry, hair silhouette, palette, and every original delicate mark. Preserve the subject's source-specific contour, lineweight/contrast, and shading character; do not make the face prettier, sharper, or more detailed as a substitute for fidelity. Change only [explicit change]. Infer only these occluded areas: [enumerated areas]. Do not infer visible features, ancestry, or details from any rejected candidate. Return one candidate with the full subject visible and no collage, labels, or comparison panel.
+```
+
+For review, compare the original, previous candidate (with its accepted/rejected status), and current candidate as separate images at the same angle and comparable face scale. Keep the full originals; label any crop or zoom. The prompt increases constraints but does not prove preservation, and an accepted candidate remains a scoped reference rather than canonical promotion or 3D-quality approval.
+
+Do not call a candidate unchanged because extraction succeeded. If a visible lock drifts, restart from the original and isolate that correction; never chain from a failed candidate. If source evidence is insufficient, mark the area unknown instead of inventing it.
+
 ## Material detail
 
 ```text

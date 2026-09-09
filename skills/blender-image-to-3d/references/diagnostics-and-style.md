@@ -16,6 +16,25 @@ Use fixed comparison cameras. Compare:
 
 If the face fails only in final light, inspect normals/materials/lighting before reshaping it. If it fails only from an angle, inspect camera and depth. Do not use a camera change to hide geometry drift.
 
+## Reference drift pitfalls
+
+Background extraction is a new image operation, not evidence that the face stayed unchanged. Treat the original as authoritative; generated candidates may supplement it, but never silently replace it or inherit from a rejected candidate.
+
+Do not equate prettier with faithful or a more detailed prompt with verified preservation. When a soft face hardens, decompose “softness” into:
+
+- contour: chin, jaw, cheek width, and nose projection;
+- lineweight/contrast: feature strokes, edge strength, and spacing;
+- shading: bridge, lip, cheek, and cast-shadow emphasis.
+
+Restore only the dimensions the source supports. “Soft” is source-specific; do not impose it on every anime reference.
+
+If review finds a narrower chin, a stronger nose bridge, or newly emphasized lip detail or shadows, map each change to contour, lineweight/contrast, or shading before editing. Correct only the failed dimension from the original and keep the candidate provisional until the comparison passes.
+
+Compare the original, previous candidate (with its accepted/rejected status), and current candidate as actual images at comparable face scale and the same angle. Preserve full originals and disclose any crop or zoom. Do not use a generative comparison collage as evidence.
+
+Record the accepted scope and latest version in the context record. Once that evidence is sufficient, stop regenerating. Acceptance records reference scope; it does not promote a candidate to canonical source or approve 3D quality. Clarify only when the referent is genuinely ambiguous.
+This identity comparison cannot establish hidden geometry or topology.
+
 ## Topology, UV, and materials
 
 Decimate reduces density; voxel remesh joins or regularizes volume; quad remesh helps rebuild flow; none supplies character-specific facial or joint topology. Copy before any operation that may affect UVs, attributes, shape keys, or rigs. Use controlled retopology or fit a good base where deformation matters. Check texture projection for leaks, seams, and front details appearing on the back.
