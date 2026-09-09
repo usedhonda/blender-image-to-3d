@@ -6,20 +6,20 @@ This document separates completed evidence from pending checks. It is intentiona
 |---|---|---|---|
 | Blender direct scene operation | Blender 5.2.1 environment produced the reference cube render through direct operation. | Verified baseline | Repeat only if Blender version or runtime changes. |
 | Official Blender MCP | The same Blender 5.2.1 environment produced an identical cube render through the official MCP route. | Verified baseline | Confirm the exact MCP package/version if the host changes. |
-| Save and reopen | The baseline cube scene saved and reopened successfully. | Verified baseline | Verify the character `.blend` after the approved run. |
+| Save and reopen | The baseline cube and rejected character trial saved and reopened successfully. | Technical evidence only | Verify the accepted replacement model; the rejected trial is not likeness evidence. |
 | Imagegen background cleanup | A clean RGB reference with a white background was observed; alpha transparency was not claimed. | Verified handling rule | Inspect alpha mode for each future imagegen result. |
-| Design approval | The workflow requires an approved complete design revision before production. | Pending for current character | Approve the selected character's staged design revision; the earlier robot R2 is not an approval for this run. |
-| Coarse geometry and representative materials | The workflow requires a second human gate before finish work. | Pending for current character | Produce the face/hair coarse pass after its design approval and obtain the gate. |
-| Astra high design/review host | Documentation defines explicit high reasoning selection when available. | Host/config dependent | Read back the actual host/model configuration at execution time. |
-| Astra low production host | Documentation defines explicit low reasoning handoff with no fork. | Not run for current character | Execute after the complete design revision is approved; then obtain the separate coarse geometry/material approval before finish work. |
-| Imagegen/reference set | An earlier robot R2 trial produced multiple views and material references; it was not adopted for character production. | Historical trial only | Start the selected character from its single original; add and approve references only when the staged run needs them. |
-| Editable semantic parts and joins | Required by the skill and templates. | Pending for current character | Inspect named parts, hairline/neck, clothing, accessories, and hidden intersections. |
+| Design approval | An image reference was adopted; the initial modeled candidate was rejected. A restart now uses that adopted image as the production/comparison target. | Restart design set pending | Approve the consistent replacement multi-view set; do not inherit the old production plan. |
+| Coarse geometry and representative materials | The first character trial failed likeness despite technical checks passing. | Failed; not an acceptance candidate | Change the construction route and demonstrate a credible target-matching face before requesting acceptance. |
+| Astra high design/review host | Explicit high reasoning was used for the failed trial's design and corrective plan. | Host use verified; quality failed | Judge actual target correspondence; host selection is not quality evidence. |
+| Astra low production host | Explicit low reasoning executed the character build and repair. | Executed; likeness failed | Validate a supported replacement workflow; do not attribute failure to effort level without evidence. |
+| Imagegen/reference set | A character reference revision was adopted after comparison and correction. Earlier robot references are unrelated historical evidence. | Adopted modeling target; additional views pending | Generate and compare consistent views from the adopted target, with inferred areas labeled. |
+| Editable semantic parts and joins | Named meshes, materials, finite geometry and a connected head survived reopening in the rejected trial. | Partial technical evidence; visual structure failed | Check the replacement model's structure, likeness, joins and intended deformation. |
 | Export and re-import | Required completion gate. | Pending for current character | Export requested format, import into a clean scene, and render again. |
 | Motion/expressions/print | Separate optional completion gates. | Not claimed | Run only when requested and their specific checks are in scope. |
 
 ## Reproduction notes
 
-The baseline check proves the direct and official-MCP scene paths for a simple cube in the recorded Blender 5.2.1 environment. It does not prove anime identity, image-to-3D quality, Astra Low behavior, provider cost, or character rig quality. Those remain explicit acceptance checks for the approved production run.
+The baseline check proves the direct and official-MCP scene paths for a simple cube in the recorded Blender 5.2.1 environment. It does not prove anime identity, image-to-3D quality, Astra Low behavior, provider cost, or character rig quality. The failed character trial adds technical and failure evidence, not successful anime identity or rig-quality evidence. Those remain acceptance checks for the replacement run.
 
 MCP is optional. If it is unavailable, the skill may use Blender's Python or another verified local route, but it must not claim MCP evidence for that route. If an external provider times out after acceptance, query its task state before retrying.
 
@@ -67,3 +67,7 @@ This revision changes instructions and templates only. It adds no image-generati
 A local character trial saved/reopened successfully but failed likeness. The implementation used estimated ring/curve parameters and facial overlays without adequate correspondence to the adopted design. Subsequent local improvements were incorrectly treated as grounds to request stage advancement; the user rejected the result. The procedural character method remains unverified for the intended quality. Save/reopen evidence proves only that technical operation.
 
 The skill now separates original provenance from the adopted modeling target, requires target-relative visual judgment during construction, and rejects known failures before human preference approval. Further execution needs a supported cause/intervention/expected-improvement link; otherwise the method is reassessed. This documentation correction does not establish successful character production or token savings. Private trial artifacts remain excluded.
+
+## Restart status
+
+The user rejected the character trial and authorized a replacement plan. The active route starts with reconciliation of the adopted production target, consistent multi-view design references, and a licensed editable-base/operation assessment. The old coarse candidate is rejected rather than awaiting approval. No replacement character or successful reusable production route is claimed yet. Issue #3 remains open.
