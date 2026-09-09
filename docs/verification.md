@@ -30,3 +30,5 @@ MCP is optional. If it is unavailable, the skill may use Blender's Python or ano
 - Skill and plugin format validators passed. Codex `skills/list` discovered the local skill as enabled under the qualified name `blender-image-to-3d:blender-image-to-3d`. Discovery is not a completed production invocation.
 - No token reduction percentage is claimed. The image-reference trial used five image-generation calls (including one failed RGB checkerboard extraction and its white-background replacement, then one material correction). No image-generation token usage was exposed.
 - The original manual, generated demo images, production state, and local environment records are excluded from Git.
+
+Reproduced failures and their reusable fixes are documented in [workflow troubleshooting](../skills/blender-image-to-3d/references/troubleshooting.md), including Blender sibling imports, misleading process exit status, RGB checkerboards, material drift, and independent resume validity fields.
